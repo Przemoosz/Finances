@@ -59,5 +59,6 @@ def table_transactions_creation(password):
         pass
     pass
 @Decorators.function_timer(mode=timer_mode)
-def example_
-
+def example_tables(password):
+    
+    pass
