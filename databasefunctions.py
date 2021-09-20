@@ -1,8 +1,13 @@
 import psycopg2
 import Decorators
-
-timer_mode = False  # Set to False to hide info about execution time of functions
-
+import configparser
+import os
+con=configparser.ConfigParser()
+con.read('config.ini')
+if con['Timer']['timer'] == 'False':
+    timer_mode=False
+else:
+    timer_mode=True
 
 @Decorators.function_timer(mode=timer_mode)
 # Type password to database_exist to check if the database finaces exists
@@ -33,8 +38,8 @@ def drop_table(*,password=None,table=None):
 
 
 @Decorators.function_timer(mode=timer_mode)
-def acc_table_overview(password):
-    with psycopg2.connect(host="localhost", user='postgres', password=password, database='finanse', port=5432) as conn:
+def acc_table_overview(host=None, user=None, password=None, port=None):
+    with psycopg2.connect(host=host, user=user, password=password, database='finanse', port=port) as conn:
         with conn.cursor() as curs:
             #ex = "INSERT INTO accounts(Name,Owner,Currency,Funds) VALUES('Pierwsze','Adam B','PLN',1000);"
 
@@ -62,3 +67,6 @@ def table_transactions_creation(password):
 def example_tables(password):
     
     pass
+
+if __name__ == '__main__':
+    config()
