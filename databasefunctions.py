@@ -1,72 +1,61 @@
 import psycopg2
 import Decorators
 import configparser
-import os
-con=configparser.ConfigParser()
+from input_functions import DefinedInputs
+
+con = configparser.ConfigParser()
 con.read('config.ini')
 if con['Timer']['timer'] == 'False':
-    timer_mode=False
+    timer_mode = False
 else:
-    timer_mode=True
+    timer_mode = True
+
 
 @Decorators.function_timer(mode=timer_mode)
 # Type password to database_exist to check if the database finaces exists
 @Decorators.database_exist(password=None)
-def table_accounts_creation(password):
-    with psycopg2.connect(host="localhost", database='finanse', user='postgres', password=password, port=5432) as conn:
-        with conn.cursor() as curs:
-            curs.execute('CREATE TABLE IF NOT EXISTS accounts('
-                         'No SERIAL PRIMARY KEY,'
-                         'Name VARCHAR(255) NOT NULL,'
-                         'Owner VARCHAR(255) NOT NULL,'
-                         'Currency VARCHAR(3) NOT NULL,'
-                         'Funds FLOAT(2) NOT NULL,'
-                         'Creation_Date DATE NOT NULL DEFAULT CURRENT_DATE,'
-                         'Actualisation_Date DATE);')
-            conn.commit()
-            # curs.execute('ALTER SEQUENCE accounts_No_seq RESTART WITH 1 INCREMENT BY 1;')
-            # conn.commit()
-        pass
-
-
-@Decorators.function_timer(mode=timer_mode)
-def drop_table(*,password=None,table=None):
-    with psycopg2.connect(host="localhost", user='postgres', password=password, database='finanse', port=5432) as conn:
-        with conn.cursor() as curs:
-            ex=f'DROP TABLE {table};'
-            curs.execute(ex)
-
-
-@Decorators.function_timer(mode=timer_mode)
 def acc_table_overview(host=None, user=None, password=None, port=None):
     with psycopg2.connect(host=host, user=user, password=password, database='finanse', port=port) as conn:
         with conn.cursor() as curs:
-            #ex = "INSERT INTO accounts(Name,Owner,Currency,Funds) VALUES('Pierwsze','Adam B','PLN',1000);"
+            # ex = "INSERT INTO accounts(Name,Owner,Currency,Funds) VALUES('Pierwsze','Adam B','PLN',1000);"
 
             curs.execute('SELECT * FROM accounts;')
             for i in curs.fetchall():
                 print(i)
-            #print(curs.fetchall())
-            #conn.commit()
-@Decorators.function_timer(mode=timer_mode)
-def table_transactions_creation(password):
-    with psycopg2.connect(host="localhost", database='finanse', user='postgres', password=password, port=5432) as conn:
-        with conn.cursor() as curs:
-            curs.execute('CREATE TABLE IF NOT EXISTS transactions('
-                         'Transaction_No SERIAL PRIMARY KEY,'
-                         'Transaction_Name TEXT NOT NULL,'
-                         'Value FLOAT(2) NOT NULL,'
-                         'Date DATE NOT NULL DEFAULT CURRENT_DATE,'
-                         'Account_No INT REFERENCES accounts(No));')
-            conn.commit()
-            # curs.execute('ALTER SEQUENCE accounts_No_seq RESTART WITH 1 INCREMENT BY 1;')
+            # print(curs.fetchall())
             # conn.commit()
+
+
+
+
+
+@Decorators.function_timer(mode=timer_mode)
+def create_account(host=None, user=None, password=None, port=None):
+    print("Account creator")
+    acc_name = input("Account name(Not longer than 255 chars): ")
+    acc_owne = input("Account owner (Not longer than 255 chars): ")
+    acc_currency = DefinedInputs.currency()
+    acc_funds = DefinedInputs.funds()
+    command = f"INSERT INTO accounts(name,owner,currency,funds) VALUES ('{acc_name}','{acc_owne}','{acc_currency}',{acc_funds});"
+    with psycopg2.connect(host=host, database='finanse', user=user, password=password, port=port) as conn:
+        with conn.cursor() as curs:
+            curs.execute(command)
+            conn.commit()
+            pass
         pass
     pass
 @Decorators.function_timer(mode=timer_mode)
-def example_tables(password):
-    
-    pass
+def create_transaction(host=None, user=None, password=None, port=None):
+    print("Transaction creator")
+    trs_name=input("Type transaction name(Not longer than 255 chars): ")
+    trs_val=DefinedInputs.val()
+    with psycopg2.connect(host=host, database='finanse', user=user, password=password, port=port) as conn:
+        with conn.cursor() as curs:
+            curs.execute('SELECT no,name FROM accounts;')
+            print('List of avaible accounts:')
+            for i in curs.fetchall():
+                print(f'{i[0]}-{i[1]}')
+            acc_num=input("Type account number to assign transaction to them: ")
 
 if __name__ == '__main__':
-    config()
+    pass
