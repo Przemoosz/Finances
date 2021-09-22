@@ -2,7 +2,10 @@ import psycopg2
 import Decorators
 import configparser
 from input_functions import DefinedInputs
+import os
 
+if 'config.ini' not in os.listdir(os.getcwd()):
+    exit("Config.ini not found. Start setup.py first to create configuration file!")
 con = configparser.ConfigParser()
 con.read('config.ini')
 if con['Timer']['timer'] == 'False':
@@ -26,9 +29,6 @@ def acc_table_overview(host=None, user=None, password=None, port=None):
             # conn.commit()
 
 
-
-
-
 @Decorators.function_timer(mode=timer_mode)
 def create_account(host=None, user=None, password=None, port=None):
     print("Account creator")
@@ -44,18 +44,44 @@ def create_account(host=None, user=None, password=None, port=None):
             pass
         pass
     pass
+
+
 @Decorators.function_timer(mode=timer_mode)
 def create_transaction(host=None, user=None, password=None, port=None):
     print("Transaction creator")
-    trs_name=input("Type transaction name(Not longer than 255 chars): ")
-    trs_val=DefinedInputs.val()
+    trs_name = input("Type transaction name(Not longer than 255 chars): ")
+    trs_val = DefinedInputs.val()
     with psycopg2.connect(host=host, database='finanse', user=user, password=password, port=port) as conn:
         with conn.cursor() as curs:
-            curs.execute('SELECT no,name FROM accounts;')
+            curs.execute('SELECT no,name FROM accounts ORDER BY no ASC;')
             print('List of avaible accounts:')
             for i in curs.fetchall():
                 print(f'{i[0]}-{i[1]}')
-            acc_num=input("Type account number to assign transaction to them: ")
+            curs.execute('SELECT no,name FROM accounts;')
+            length = len(curs.fetchall())
+            acc_num = DefinedInputs.acc_number(length)
+            command = f"INSERT INTO transactions(transaction_name,value,account_no) VALUES ('{trs_name}',{trs_val},{acc_num});"
+            curs.execute(command)
+            conn.commit()
+            funds_actualisation(acc_num, trs_val, host=host, user=user, password=password, port=port)
+
+
+def funds_actualisation(acc_num, value, *, host=None, user=None, password=None, port=None):
+    with psycopg2.connect(host=host, database='finanse', user=user, password=password, port=port) as conn:
+        with conn.cursor() as curs:
+            command = f"SELECT funds FROM accounts WHERE no={acc_num};"
+            curs.execute(command)
+            funds = curs.fetchall()[0][0]
+
+            funds = funds + value
+            command = f"UPDATE accounts SET funds={funds} WHERE no={acc_num};"
+            curs.execute(command)
+            conn.commit()
+            pass
+        pass
+
+    pass
+
 
 if __name__ == '__main__':
     pass
