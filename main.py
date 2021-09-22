@@ -17,9 +17,11 @@ def main():
     except ValueError:
         exit("Can not conver 'port' to intiger! Run setup.py again and type correct port!")
     db_pass = con['DATABASE']['password']
-    #global timer_mode
-    timer_mode=con['Timer']['timer']
-    databasefunctions.acc_table_overview(host=db_host, user=db_user, password=db_pass, port=db_port)
+    #databasefunctions.create_account(host=db_host, user=db_user, password=db_pass, port=db_port)
+    #databasefunctions.acc_table_overview(host=db_host, user=db_user, password=db_pass, port=db_port)
+    databasefunctions.create_transaction(host=db_host, user=db_user, password=db_pass, port=db_port)
+    #print(DefinedInputs.funds())
     pass
 if __name__ == '__main__':
     main()
+    #run_setup()
