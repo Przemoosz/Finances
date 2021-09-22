@@ -25,3 +25,15 @@ class DefinedInputs:
         except ValueError:
             print("Value must be float data type!")
             return DefinedInputs.val()
+    @staticmethod
+    def acc_number(len):
+        number=input('Type account number: ')
+        try:
+            number=int(number)
+            if number > len or number < 0:
+                return DefinedInputs.acc_number(len)
+            return number
+        except ValueError:
+            print("Account number must be int data type!")
+            return DefinedInputs.acc_number(len)
+        pass
