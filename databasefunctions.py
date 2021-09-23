@@ -3,6 +3,8 @@ import Decorators
 import configparser
 from input_functions import DefinedInputs
 import os
+from datetime import date
+
 
 if 'config.ini' not in os.listdir(os.getcwd()):
     exit("Config.ini not found. Start setup.py first to create configuration file!")
@@ -17,18 +19,30 @@ else:
 @Decorators.function_timer(mode=timer_mode)
 # Type password to database_exist to check if the database finaces exists
 @Decorators.database_exist(password=None)
-def acc_table_overview(host=None, user=None, password=None, port=None):
+def account_overview(host=None, user=None, password=None, port=None):
     with psycopg2.connect(host=host, user=user, password=password, database='finanse', port=port) as conn:
         with conn.cursor() as curs:
-            # ex = "INSERT INTO accounts(Name,Owner,Currency,Funds) VALUES('Pierwsze','Adam B','PLN',1000);"
-
-            curs.execute('SELECT * FROM accounts;')
+            curs.execute('SELECT no,name FROM accounts ORDER BY no ASC;')
+            print('List of avaible accounts:')
             for i in curs.fetchall():
-                print(i)
-            # print(curs.fetchall())
-            # conn.commit()
-
-
+                print(f'{i[0]}-{i[1]}')
+            curs.execute('SELECT no,name FROM accounts;')
+            length = len(curs.fetchall())
+            acc_num = DefinedInputs.acc_number(length)
+            command=f"SELECT * FROM accounts WHERE no = {acc_num}"
+            curs.execute(command)
+            tup=curs.fetchone()
+            print(f'Name: {tup[1]}\n'
+                  f'Owner: {tup[2]}\n'
+                  f'Currency: {tup[3]}\n'
+                  f'Funds: {tup[4]}\n'
+                  f'Creation Date: {tup[5]}\n'
+                  f'Actualisation date: {tup[6]}\n')
+            print(f"Transactions on accout '{tup[1]}'")
+            command = f"SELECT * FROM transactions WHERE account_no = {acc_num};"
+            curs.execute(command)
+            [print(f'Title: {i[1]}, Value: {i[2]}, Date: {i[3]}') for i in curs.fetchall()]
+            print("")
 @Decorators.function_timer(mode=timer_mode)
 def create_account(host=None, user=None, password=None, port=None):
     print("Account creator")
@@ -77,11 +91,13 @@ def funds_actualisation(acc_num, value, *, host=None, user=None, password=None, 
             command = f"UPDATE accounts SET funds={funds} WHERE no={acc_num};"
             curs.execute(command)
             conn.commit()
+            command = f"UPDATE accounts SET actualisation_date='{date.today()}' WHERE no={acc_num};"
+            curs.execute(command)
+            conn.commit()
             pass
         pass
 
     pass
-
 
 if __name__ == '__main__':
     pass
