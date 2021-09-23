@@ -1,7 +1,12 @@
 import databasefunctions
 import os
 import configparser
+import time
 
+def reset():
+    os.system('python3 setup.py')
+    time.sleep(3)
+    exit()
 def main():
     path=os.getcwd()+'\\config.ini'
     #print(os.listdir(os.getcwd()))
@@ -18,9 +23,29 @@ def main():
         exit("Can not conver 'port' to intiger! Run setup.py again and type correct port!")
     db_pass = con['DATABASE']['password']
     #databasefunctions.create_account(host=db_host, user=db_user, password=db_pass, port=db_port)
-    #databasefunctions.acc_table_overview(host=db_host, user=db_user, password=db_pass, port=db_port)
-    databasefunctions.create_transaction(host=db_host, user=db_user, password=db_pass, port=db_port)
-    #print(DefinedInputs.funds())
+    print("Welcome to finaces management program. Chose what you want to do:")
+    while True:
+        print("1. Create new account\n"
+              "2. Create new transaction\n"
+              "3. Overview accout\n"
+              "0. Exit\n"
+              "")
+        inp = input("Type number: ")
+        if inp=='1':
+            databasefunctions.create_account(host=db_host, user=db_user, password=db_pass, port=db_port)
+            pass
+        elif inp == '2':
+            databasefunctions.create_transaction(host=db_host, user=db_user, password=db_pass, port=db_port)
+            pass
+        elif inp == '3':
+            databasefunctions.account_overview(host=db_host, user=db_user, password=db_pass, port=db_port)
+            pass
+        elif inp == '0':
+            break
+        elif inp.lower() == 'reset':
+            reset()
+        else:
+            continue
     pass
 if __name__ == '__main__':
     main()
