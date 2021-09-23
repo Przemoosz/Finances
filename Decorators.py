@@ -2,6 +2,11 @@ import time
 import functools
 import psycopg2
 
+'''This is decorators.py
+    I added two decorators but one is used mostly its function_timer
+    It measures time the function is executed and shows time using ptint function
+    There is also database_exist decorator which control if the databes finanse exists'''
+
 
 def function_timer(_func=None, *, mode=True):
     def timer(func):

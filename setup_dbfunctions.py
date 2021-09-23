@@ -1,6 +1,12 @@
 import psycopg2
 from psycopg2 import sql, extensions
-
+'''This file is part of setup.py file
+    It contains a functions that are used in setup file. Here is simple functions overview: 
+    database_drop - checks if database finanse exists if yes function drop this data base
+    database_create - create new data base if old does not exists
+    table_accounts_creation - create table accounts in finanse database
+    table_transactions_creation - create table transactions in finanse database
+    You should not change anything in setup_dbfunctions.py, changes may cause some serious problems!'''
 
 def database_drop(*, host, user, password, port):
     try:

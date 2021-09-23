@@ -2,8 +2,13 @@ import setup_dbfunctions
 import os
 import configparser
 import Decorators
-
-
+# Przemysław Szewczak 09.2021
+''' Setup script
+    Creates config ini that contains basic database info like: port, username, host and password. 
+    Config contains additional info about timer mode.
+    Note that this is only a simple python program to set and handle postgreSQL database.
+    I know that password to the database should not be saved in .ini file.
+    This is just a small prototype. You should not change anything in setup.py, changes may cause some serious problems!'''
 @Decorators.function_timer()
 def setup():
     path = os.getcwd() + '\\config.ini'
@@ -21,6 +26,7 @@ def setup():
         db_port = 5432
     db_pass = input("Enter password [Can not be empty!]: ")
     config = configparser.ConfigParser()
+    # Creating config.ini
     config['DATABASE'] = {'Hostname': db_host,
                           'Username': db_user,
                           'Port': db_port,
