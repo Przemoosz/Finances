@@ -48,36 +48,36 @@ def database_create(*, host, user, password, port):
         print('Creted database "finanse" - 75%')
     except Exception as expectation:
         print('Something went wrong!')
-        print(f'Expectation mssage: {expectation}')
+        print(f'Expectation message: {expectation}')
+        curs.close()
+        conn.close()
         exit()
 
 
 def table_accounts_creation(*, host, user, password, port):
-    with psycopg2.connect(host=host, database='finanse', user=user, password=password, port=port) as conn:
-        with conn.cursor() as curs:
-            curs.execute('CREATE TABLE IF NOT EXISTS accounts('
-                         'No SERIAL PRIMARY KEY,'
-                         'Name VARCHAR(255) NOT NULL,'
-                         'Owner VARCHAR(255) NOT NULL,'
-                         'Currency VARCHAR(3) NOT NULL,'
-                         'Funds FLOAT(2) NOT NULL,'
-                         'Creation_Date DATE NOT NULL DEFAULT CURRENT_DATE,'
-                         'Actualisation_Date DATE);')
-            conn.commit()
-            print('Created "accounts" table - 80%')
+    with psycopg2.connect(host=host, database='finanse', user=user, password=password, port=port) as conn, conn.cursor() as curs:
+        curs.execute('CREATE TABLE IF NOT EXISTS accounts('
+                     'No SERIAL PRIMARY KEY,'
+                     'Name VARCHAR(255) NOT NULL,'
+                     'Owner VARCHAR(255) NOT NULL,'
+                     'Currency VARCHAR(3) NOT NULL,'
+                     'Funds FLOAT(2) NOT NULL,'
+                     'Creation_Date DATE NOT NULL DEFAULT CURRENT_DATE,'
+                     'Actualisation_Date DATE);')
+        conn.commit()
+        print('Created "accounts" table - 80%')
         pass
 
 
 def table_transactions_creation(*, host, user, password, port):
-    with psycopg2.connect(host=host, database='finanse', user=user, password=password, port=port) as conn:
-        with conn.cursor() as curs:
-            curs.execute('CREATE TABLE IF NOT EXISTS transactions('
-                         'Transaction_No SERIAL PRIMARY KEY,'
-                         'Transaction_Name TEXT NOT NULL,'
-                         'Value FLOAT(2) NOT NULL,'
-                         'Date DATE NOT NULL DEFAULT CURRENT_DATE,'
-                         'Account_No INT REFERENCES accounts(No));')
-            conn.commit()
-            print('Created "transactions" table - 90%')
+    with psycopg2.connect(host=host, database='finanse', user=user, password=password, port=port) as conn, conn.cursor() as curs:
+        curs.execute('CREATE TABLE IF NOT EXISTS transactions('
+                     'Transaction_No SERIAL PRIMARY KEY,'
+                     'Transaction_Name TEXT NOT NULL,'
+                     'Value FLOAT(2) NOT NULL,'
+                     'Date DATE NOT NULL DEFAULT CURRENT_DATE,'
+                     'Account_No INT REFERENCES accounts(No));')
+        conn.commit()
+        print('Created "transactions" table - 90%')
         pass
     pass
