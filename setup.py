@@ -1,7 +1,9 @@
 import setup_dbfunctions
 import os
 import configparser
+from threading import Thread
 import Decorators
+import concurrent.futures
 # Przemysław Szewczak 09.2021
 ''' Setup script
     Creates config ini that contains basic database info like: port, username, host and password. 
@@ -9,11 +11,25 @@ import Decorators
     Note that this is only a simple python program to set and handle postgreSQL database.
     I know that password to the database should not be saved in .ini file.
     This is just a small prototype. You should not change anything in setup.py, changes may cause some serious problems!'''
+def save_config_timer():
+    timer = input("Type False to turn off timer decorator(Default - True): ")
+    if timer.lower() != 'false':
+        return True
+    else:
+        return False
+def db_creation(db_host,db_user,db_port,db_pass):
+    print('\nStarting database operations - 0%')
+    setup_dbfunctions.database_drop(host=db_host, user=db_user, password=db_pass, port=db_port)
+    setup_dbfunctions.database_create(host=db_host, user=db_user, password=db_pass, port=db_port)
+    setup_dbfunctions.table_accounts_creation(host=db_host, user=db_user, password=db_pass, port=db_port)
+    setup_dbfunctions.table_transactions_creation(host=db_host, user=db_user, password=db_pass, port=db_port)
+    print('Database and tables created successfully - 100%\n')
 @Decorators.function_timer()
 def setup():
     path = os.getcwd() + '\\config.ini'
     # print(path)
     print("Getting informations about database. Press enter to set default values. Default values are in (brackets).")
+
     db_host = input("Enter hostname (localhost):")
     if db_host == "":
         db_host = 'localhost'
@@ -31,25 +47,18 @@ def setup():
                           'Username': db_user,
                           'Port': db_port,
                           'Password': db_pass}
-    timer = input("Type False to turn off timer decorator(Default - True): ")
-    if timer.lower() != 'false':
-        timer = True
-    else:
-        timer = False
+    #timer = input("Type False to turn off timer decorator(Default - True): ")
+    db_drop = input("Type 'Yes' to keep your previous database [Press enter for first run]: ")
+    if db_drop.lower() != 'yes':
+        threads = [Thread(target=save_config_timer),Thread(target=db_creation, args=[db_host,db_user,db_port,db_pass])]
+        [thread.start() for thread in threads]
+        [thread.join() for thread in threads]
+    timer = True
     config['Timer'] = {'Timer': timer}
     print('\nStarting save config file procedure - 0%')
     with open(path, 'w', encoding='UTF-8') as file:
         config.write(file)
     print("Writing config file went successfully - 100%\n")
-    db_drop = input("Type 'Yes' to keep your previous database [Press enter for first run]: ")
-    if db_drop.lower() != 'yes':
-        print('\nStarting database operations - 0%')
-        setup_dbfunctions.database_drop(host=db_host, user=db_user, password=db_pass, port=db_port)
-        setup_dbfunctions.database_create(host=db_host, user=db_user, password=db_pass, port=db_port)
-        setup_dbfunctions.table_accounts_creation(host=db_host, user=db_user, password=db_pass, port=db_port)
-        setup_dbfunctions.table_transactions_creation(host=db_host, user=db_user, password=db_pass, port=db_port)
-        print('Database and tables created successfully - 100%\n')
-
 
 if __name__ == '__main__':
     setup()
